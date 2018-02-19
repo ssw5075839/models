@@ -99,7 +99,7 @@ class SSDVgg16FeatureExtractor(ssd_meta_arch.SSDFeatureExtractor):
     net,image_features = vgg.vgg_16(ops.pad_to_multiple(preprocessed_inputs, self._pad_to_multiple),
                                         final_endpoint='pool5',spatial_squeeze=False)
     #double check scale filler
-    image_features['vgg_16/conv4_3_norm']=custom_layers.l2_normalization(image_features['vgg_16/conv4/conv4_3'],scaling=True,scope='conv4')
+    image_features['vgg_16/conv4_3_norm']=custom_layers.l2_normalization(image_features['vgg_16/conv4/conv4_3'],scaling=True,scope='vgg_16/conv4_3_norm')
     with slim.arg_scope(self._conv_hyperparams):
       with tf.variable_scope('vgg_16', reuse=self._reuse_weights) as scope:
         # In [5]: net
