@@ -142,6 +142,7 @@ vgg_a.default_image_size = 224
 
 
 def vgg_16(inputs,
+           final_endpoint='fc8',
            num_classes=1000,
            is_training=True,
            dropout_keep_prob=0.5,
@@ -149,6 +150,55 @@ def vgg_16(inputs,
            scope='vgg_16',
            fc_conv_padding='VALID',
            global_pool=False):
+  """
+  In [6]: net
+  Out[6]: <tf.Tensor 'vgg_16/fc8/BiasAdd:0' shape=(32, 3, 3, 1000) dtype=float32>
+
+  In [7]: end_points
+  Out[7]:
+  OrderedDict([('vgg_16/conv1/conv1_1',
+                <tf.Tensor 'vgg_16/conv1/conv1_1/Relu:0' shape=(32, 300, 300, 64) dtype=float32>),
+               ('vgg_16/conv1/conv1_2',
+                <tf.Tensor 'vgg_16/conv1/conv1_2/Relu:0' shape=(32, 300, 300, 64) dtype=float32>),
+               ('vgg_16/pool1',
+                <tf.Tensor 'vgg_16/pool1/MaxPool:0' shape=(32, 150, 150, 64) dtype=float32>),
+               ('vgg_16/conv2/conv2_1',
+                <tf.Tensor 'vgg_16/conv2/conv2_1/Relu:0' shape=(32, 150, 150, 128) dtype=float32>),
+               ('vgg_16/conv2/conv2_2',
+                <tf.Tensor 'vgg_16/conv2/conv2_2/Relu:0' shape=(32, 150, 150, 128) dtype=float32>),
+               ('vgg_16/pool2',
+                <tf.Tensor 'vgg_16/pool2/MaxPool:0' shape=(32, 75, 75, 128) dtype=float32>),
+               ('vgg_16/conv3/conv3_1',
+                <tf.Tensor 'vgg_16/conv3/conv3_1/Relu:0' shape=(32, 75, 75, 256) dtype=float32>),
+               ('vgg_16/conv3/conv3_2',
+                <tf.Tensor 'vgg_16/conv3/conv3_2/Relu:0' shape=(32, 75, 75, 256) dtype=float32>),
+               ('vgg_16/conv3/conv3_3',
+                <tf.Tensor 'vgg_16/conv3/conv3_3/Relu:0' shape=(32, 75, 75, 256) dtype=float32>),
+               ('vgg_16/pool3',
+                <tf.Tensor 'vgg_16/pool3/MaxPool:0' shape=(32, 37, 37, 256) dtype=float32>),
+               ('vgg_16/conv4/conv4_1',
+                <tf.Tensor 'vgg_16/conv4/conv4_1/Relu:0' shape=(32, 37, 37, 512) dtype=float32>),
+               ('vgg_16/conv4/conv4_2',
+                <tf.Tensor 'vgg_16/conv4/conv4_2/Relu:0' shape=(32, 37, 37, 512) dtype=float32>),
+               ('vgg_16/conv4/conv4_3',
+                <tf.Tensor 'vgg_16/conv4/conv4_3/Relu:0' shape=(32, 37, 37, 512) dtype=float32>),
+               ('vgg_16/pool4',
+                <tf.Tensor 'vgg_16/pool4/MaxPool:0' shape=(32, 18, 18, 512) dtype=float32>),
+               ('vgg_16/conv5/conv5_1',
+                <tf.Tensor 'vgg_16/conv5/conv5_1/Relu:0' shape=(32, 18, 18, 512) dtype=float32>),
+               ('vgg_16/conv5/conv5_2',
+                <tf.Tensor 'vgg_16/conv5/conv5_2/Relu:0' shape=(32, 18, 18, 512) dtype=float32>),
+               ('vgg_16/conv5/conv5_3',
+                <tf.Tensor 'vgg_16/conv5/conv5_3/Relu:0' shape=(32, 18, 18, 512) dtype=float32>),
+               ('vgg_16/pool5',
+                <tf.Tensor 'vgg_16/pool5/MaxPool:0' shape=(32, 9, 9, 512) dtype=float32>),
+               ('vgg_16/fc6',
+                <tf.Tensor 'vgg_16/fc6/Relu:0' shape=(32, 3, 3, 4096) dtype=float32>),
+               ('vgg_16/fc7',
+                <tf.Tensor 'vgg_16/fc7/Relu:0' shape=(32, 3, 3, 4096) dtype=float32>),
+               ('vgg_16/fc8',
+                <tf.Tensor 'vgg_16/fc8/BiasAdd:0' shape=(32, 3, 3, 1000) dtype=float32>)])
+  """
   """Oxford Net VGG 16-Layers version D Example.
 
   Note: All the fully_connected layers have been transformed to conv2d layers.
@@ -185,22 +235,61 @@ def vgg_16(inputs,
     with slim.arg_scope([slim.conv2d, slim.fully_connected, slim.max_pool2d],
                         outputs_collections=end_points_collection):
       net = slim.repeat(inputs, 2, slim.conv2d, 64, [3, 3], scope='conv1')
+      if 'conv1' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.max_pool2d(net, [2, 2], scope='pool1')
+      if 'pool1' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.repeat(net, 2, slim.conv2d, 128, [3, 3], scope='conv2')
+      if 'conv2' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.max_pool2d(net, [2, 2], scope='pool2')
+      if 'pool2' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.repeat(net, 3, slim.conv2d, 256, [3, 3], scope='conv3')
+      if 'conv3' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.max_pool2d(net, [2, 2], scope='pool3')
+      if 'pool3' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv4')
+      if 'conv4' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.max_pool2d(net, [2, 2], scope='pool4')
+      if 'pool4' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv5')
-      net = slim.max_pool2d(net, [2, 2], scope='pool5')
+      if 'conv5' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
+      net = slim.max_pool2d(net, [3, 3], stride=1, padding='SAME', scope='pool5')
+      if 'pool5' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
 
       # Use conv2d instead of fully_connected layers.
       net = slim.conv2d(net, 4096, [7, 7], padding=fc_conv_padding, scope='fc6')
+      if 'fc6' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.dropout(net, dropout_keep_prob, is_training=is_training,
                          scope='dropout6')
+      if 'dropout6' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
       net = slim.conv2d(net, 4096, [1, 1], scope='fc7')
-      # Convert end_points_collection into a end_point dict.
+      if 'fc7' == final_endpoint:
+        end_points = slim.utils.convert_collection_to_dict(end_points_collection)
+        return net, end_points
+
       end_points = slim.utils.convert_collection_to_dict(end_points_collection)
       if global_pool:
         net = tf.reduce_mean(net, [1, 2], keep_dims=True, name='global_pool')

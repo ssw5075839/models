@@ -31,6 +31,7 @@ from object_detection.models.embedded_ssd_mobilenet_v1_feature_extractor import 
 from object_detection.models.ssd_inception_v2_feature_extractor import SSDInceptionV2FeatureExtractor
 from object_detection.models.ssd_inception_v3_feature_extractor import SSDInceptionV3FeatureExtractor
 from object_detection.models.ssd_mobilenet_v1_feature_extractor import SSDMobileNetV1FeatureExtractor
+from object_detection.models.ssd_vgg16_feature_extractor import SSDVgg16FeatureExtractor
 from object_detection.protos import model_pb2
 
 FRCNN_RESNET_FEAT_MAPS = {
@@ -136,6 +137,79 @@ class ModelBuilderTest(tf.test.TestCase):
     self.assertIsInstance(model, ssd_meta_arch.SSDMetaArch)
     self.assertIsInstance(model._feature_extractor,
                           SSDInceptionV2FeatureExtractor)
+
+  def test_create_ssd_vgg16_model_from_config(self):
+    model_text_proto = """
+      ssd {
+        feature_extractor {
+          type: 'ssd_vgg_16'
+          conv_hyperparams {
+            regularizer {
+                l2_regularizer {
+                }
+              }
+              initializer {
+                truncated_normal_initializer {
+                }
+              }
+          }
+        }
+        box_coder {
+          faster_rcnn_box_coder {
+          }
+        }
+        matcher {
+          argmax_matcher {
+          }
+        }
+        similarity_calculator {
+          iou_similarity {
+          }
+        }
+        anchor_generator {
+          ssd_anchor_generator {
+            aspect_ratios: 1.0
+          }
+        }
+        image_resizer {
+          fixed_shape_resizer {
+            height: 300
+            width: 300
+          }
+        }
+        box_predictor {
+          convolutional_box_predictor {
+            conv_hyperparams {
+              regularizer {
+                l2_regularizer {
+                }
+              }
+              initializer {
+                truncated_normal_initializer {
+                }
+              }
+            }
+          }
+        }
+        loss {
+          classification_loss {
+            weighted_softmax {
+            }
+          }
+          localization_loss {
+            weighted_smooth_l1 {
+            }
+          }
+        }
+      }"""
+    model_proto = model_pb2.DetectionModel()
+    text_format.Merge(model_text_proto, model_proto)
+    model = self.create_model(model_proto)
+    self.assertIsInstance(model, ssd_meta_arch.SSDMetaArch)
+    self.assertIsInstance(model._feature_extractor,
+                          SSDVgg16FeatureExtractor)
+    image = tf.placeholder(tf.float32,shape=[32,300,300,3])
+    print model._feature_extractor.extract_features(image)
 
   def test_create_ssd_inception_v3_model_from_config(self):
     model_text_proto = """
